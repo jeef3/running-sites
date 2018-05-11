@@ -1,53 +1,37 @@
 #!/usr/bin/env node
 
-const { exec } = require('child_process');
+const childProcess = require('child_process');
+const pify = require('pify');
+
+const exec = pify(childProcess.exec);
 
 const run = async () => {
-  const processes = await new Promise((resolve, reject) => {
-    exec('ps | grep node', (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+  const processesResult = await exec('ps | grep node');
+  const listeningResult = await exec('lsof -nP -i4TCP | grep node | grep LISTEN');
 
-      const ps = stdout
-        .split('\n')
-        .slice(0, -1)
-        .map(p => p.trim())
-        .map(p => p.split(' ').filter(part => !!part))
-        .map(p => {
-          const [pid, tty, , process, app, ...params] = p;
-          return {
-            pid, tty, process, app, params
-          };
-        });
-
-      return resolve(ps);
-    })
-  });
-
-  const listening = await new Promise((resolve, reject) => {
-    exec('lsof -nP -i4TCP | grep node | grep LISTEN', (err, stdout) => {
-      if (err) {
-        reject(err);
-        return;
+  const processes = processesResult
+    .split('\n')
+    .slice(0, -1)
+    .map(p => p.trim())
+    .map(p => p.split(' ').filter(part => !!part))
+    .map(p => {
+      const [pid, tty, , process, app, ...params] = p;
+      return {
+        pid, tty, process, app, params
       };
+    });
 
-      const list = stdout
-        .split('\n')
-        .slice(0, -1)
-        .map(l => l.trim())
-        .map(l => l.split(' ').filter(part => !!part))
-        .map(l => {
-          const [ process, pid, , , , , , , addr ] = l;
-          return {
-            process, pid, addr
-          }
-        })
-
-      return resolve(list);
+  const listening = listeningResult
+    .split('\n')
+    .slice(0, -1)
+    .map(l => l.trim())
+    .map(l => l.split(' ').filter(part => !!part))
+    .map(l => {
+      const [ process, pid, , , , , , , addr ] = l;
+      return {
+        process, pid, addr
+      }
     })
-  });
 
   const getProcessFor = (pid) =>
     processes.find(p => p.pid === pid);
@@ -57,7 +41,7 @@ const run = async () => {
     .filter(host => !!host.process)
     .map(host => ({ ...host.listen, ...host.process }));
 
-  
+  console.log(hosts);
 };
 
 run();
