@@ -11,7 +11,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.get('/sites.json', (req, res, next) => {
+app.get('/sites.json', (req, res) => {
   sites(port).then(s => {
     res.json(s);
   });
