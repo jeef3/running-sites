@@ -3,6 +3,7 @@
 const childProcess = require('child_process');
 const pify = require('pify');
 const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
 const exec = pify(childProcess.exec);
 
@@ -48,19 +49,18 @@ const run = async () => {
     const port = addr.substr(addr.indexOf(':') + 1);
     const url = `http://localhost:${port}`;
 
-    return fetch(url);
+    return fetch(url)
+      .then(res => res.text())
+      .then(html => ({ host, html, url }));
   });
 
-  const sites = await Promise
-    .all(fetchSites)
-    .then(results => Promise.all(results.map(res => res.text())))
-    // .then(sites => {
-    //   sites.map(site => {
-    //     console.log(site);
-    //   });
-    // });
-  //
-  console.log(sites);
+  const sites = await Promise.all(fetchSites);
+
+  sites.forEach(site => {
+    const $ = cheerio.load(site.html);
+
+    console.log($('title').text(), '::', site.url);
+  })
 };
 
 run();
