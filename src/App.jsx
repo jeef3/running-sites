@@ -57,6 +57,7 @@ export default class App extends React.Component {
           }}>
             <iframe
               src={site.url}
+              title={site.title}
               style={{
                 width: (thumbnailWidth / scale), height: (thumbnailHeight / scale), border: 0,
                 transform: `scale(${scale})`,
