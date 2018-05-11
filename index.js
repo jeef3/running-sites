@@ -2,6 +2,7 @@
 
 const childProcess = require('child_process');
 const pify = require('pify');
+const fetch = require('node-fetch');
 
 const exec = pify(childProcess.exec);
 
@@ -31,7 +32,7 @@ const run = async () => {
       return {
         process, pid, addr
       }
-    })
+    });
 
   const getProcessFor = (pid) =>
     processes.find(p => p.pid === pid);
@@ -41,7 +42,25 @@ const run = async () => {
     .filter(host => !!host.process)
     .map(host => ({ ...host.listen, ...host.process }));
 
-  console.log(hosts);
+  // Now get some info
+  const fetchSites = hosts.map(host => {
+    const { addr } = host;
+    const port = addr.substr(addr.indexOf(':') + 1);
+    const url = `http://localhost:${port}`;
+
+    return fetch(url);
+  });
+
+  const sites = await Promise
+    .all(fetchSites)
+    .then(results => Promise.all(results.map(res => res.text())))
+    // .then(sites => {
+    //   sites.map(site => {
+    //     console.log(site);
+    //   });
+    // });
+  //
+  console.log(sites);
 };
 
 run();
