@@ -1,7 +1,6 @@
 const childProcess = require('child_process');
 const pify = require('pify');
 const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 
 const exec = pify(childProcess.exec);
 
