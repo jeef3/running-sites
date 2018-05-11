@@ -3,10 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "server": "nodemon src/server.js"
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.3",
     "node-fetch": "^2.1.2",
     "pify": "^3.0.0",
-    "portscanner": "^2.1.1"
+    "portscanner": "^2.1.1",
+    "react-scripts": "^1.1.4"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "nodemon": "^1.17.4"
   }
 }

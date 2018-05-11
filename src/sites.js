@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const childProcess = require('child_process');
 const pify = require('pify');
 const fetch = require('node-fetch');
@@ -7,11 +5,9 @@ const cheerio = require('cheerio');
 
 const exec = pify(childProcess.exec);
 
-const run = async () => {
-  const processesResult = await exec('ps | grep node');
-  const listeningResult = await exec('lsof -nP -i4TCP | grep node | grep LISTEN');
-
-  const processes = processesResult
+module.exports = async (ignore) => {
+  // Get running processes
+  const processes = (await exec('ps | grep node'))
     .split('\n')
     .slice(0, -1)
     .map(p => p.trim())
@@ -23,44 +19,42 @@ const run = async () => {
       };
     });
 
-  const listening = listeningResult
+  // Find listening processes
+  const listening = (await exec('lsof -nP -i4TCP | grep node | grep LISTEN'))
     .split('\n')
     .slice(0, -1)
     .map(l => l.trim())
     .map(l => l.split(' ').filter(part => !!part))
     .map(l => {
       const [ process, pid, , , , , , , addr ] = l;
+      const port = Number.parseInt(addr.substr(addr.indexOf(':') + 1), 10);
+
       return {
-        process, pid, addr
+        process, pid, addr, port
       }
-    });
+    })
+    .filter(l => l.port !== ignore);
 
   const getProcessFor = (pid) =>
     processes.find(p => p.pid === pid);
 
+  // Combine the two and intersect
   const hosts = listening
     .map(listen => ({ listen, process: getProcessFor(listen.pid) }))
     .filter(host => !!host.process)
     .map(host => ({ ...host.listen, ...host.process }));
 
-  // Now get some info
+  // Now get the web info
   const fetchSites = hosts.map(host => {
-    const { addr } = host;
-    const port = addr.substr(addr.indexOf(':') + 1);
+    const { port } = host;
     const url = `http://localhost:${port}`;
+
+    console.log('Found web server on', url);
 
     return fetch(url)
       .then(res => res.text())
       .then(html => ({ host, html, url }));
   });
 
-  const sites = await Promise.all(fetchSites);
-
-  sites.forEach(site => {
-    const $ = cheerio.load(site.html);
-
-    console.log($('title').text(), '::', site.url);
-  })
+  return await Promise.all(fetchSites);
 };
-
-run();
