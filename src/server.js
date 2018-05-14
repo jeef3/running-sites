@@ -11,6 +11,8 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use(express.static('build'));
+
 app.get('/sites.json', (req, res) => {
   sites(port).then(s => {
     res.json(s);

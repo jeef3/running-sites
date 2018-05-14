@@ -6,7 +6,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "server": "nodemon src/server.js"
+    "server": "nodemon src/server.js",
+    "server:prod": "node src/server.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",

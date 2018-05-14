@@ -33,11 +33,18 @@ export default class App extends React.Component {
     return (
       <div style={{
         width: '100vw',
-        height: '100vh'
+        height: '100vh',
+        background: '#e0e0e0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
       {this.state.sites.map(site => (
-        <div key={site.host.pid}>
-          <h2>{site.title}</h2>
+        <div key={site.host.pid} style={{
+          marginRight: 40,
+          textAlign: 'center',
+          textDecoration: 'none'
+        }}>
           <a
             href={site.url}
             style={{
@@ -53,20 +60,39 @@ export default class App extends React.Component {
             overflow: 'hidden',
             width: thumbnailWidth,
             height: thumbnailHeight,
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            boxShadow: '0 5px 5px rgba(0, 0, 0, 0.25)'
           }}>
             <iframe
               src={site.url}
               title={site.title}
               style={{
+                overflow: 'hidden',
                 width: (thumbnailWidth / scale), height: (thumbnailHeight / scale), border: 0,
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left'
               }}
             ></iframe>
           </div>
+
         </a>
-        </div>
+        <h2
+          style={{
+            margin: '1em 0 0.25em',
+            color: 'black',
+          }}
+        >
+          {site.title}
+        </h2>
+        <p
+          style={{
+          margin: 0,
+          color: '#999999'
+          }}
+        >
+          {site.url}
+        </p>
+      </div>
       ))}
     </div>);
   }
