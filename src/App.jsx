@@ -13,7 +13,7 @@ export default class App extends React.Component {
       .then(res => res.json())
       .then(sites => {
         // TODO: temp, ignore this static serve
-        const s = sites.filter(si => si.host.port !== 3000)
+        const s = sites
           .map(si => {
             const $ = cheerio.load(si.html);
             const title = $('title').text() || 'Unknown';
