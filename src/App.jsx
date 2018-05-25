@@ -5,10 +5,14 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { sites: [] };
+    this.state = { loading: true, sites: [] };
   }
 
   componentDidMount() {
+    this.getSites();
+  }
+
+  getSites() {
     fetch('http://localhost:5000/sites.json')
       .then(res => res.json())
       .then(sites => {
@@ -20,7 +24,9 @@ export default class App extends React.Component {
             return { ...si, title, url: `http://localhost:${si.host.port}` };
           });
 
-        this.setState({ sites: s });
+        this.setState({ loading: false, sites: s });
+
+        setTimeout(() => this.getSites(), 1000);
       });
   }
 
